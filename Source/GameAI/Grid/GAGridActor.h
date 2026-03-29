@@ -232,5 +232,5 @@ public:
 	bool RefreshProctorVisionMesh();
 
 	UFUNCTION(BlueprintCallable)
-	bool RefreshProctorVisionTexture(const FCellRef& Destination = FCellRef(), bool HighlightDestination = true);
+	bool RefreshProctorVisionTexture();
 };
