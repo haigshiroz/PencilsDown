@@ -40,7 +40,13 @@ AGAGridActor::AGAGridActor(const FObjectInitializer& ObjectInitializer)
 	DebugMeshComponent->SetupAttachment(RootComponent);
 	DebugMeshComponent->SetVisibility(false);
 
-	DebugMeshZOffset = 30.0f;
+	DebugMeshZOffset = 5.0f;
+
+	ProctorVisionMeshComponent = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("ProctorVisionMesh"));
+	ProctorVisionMeshComponent->SetupAttachment(RootComponent);
+	ProctorVisionMeshComponent->SetVisibility(false);
+
+	DebugMeshZOffset = 10.0f;
 
 }
 
@@ -421,8 +427,8 @@ bool AGAGridActor::RefreshDataFromNav()
 
 // Debugging and Visualization --------------------------------
 
-
-bool AGAGridActor::RefreshDebugMesh()
+// Helper for refreshing meshes
+bool AGAGridActor::RefreshMeshHelper(TObjectPtr<UProceduralMeshComponent> MeshComponent, float MeshZOffset)
 {
 	TArray<FVector> Vertices;
 	TArray<int32> Triangles;
@@ -439,7 +445,7 @@ bool AGAGridActor::RefreshDebugMesh()
 		Vertices.SetNumUninitialized(VertexCount);
 
 		FVector2D ZeroZeroCorner(
-			-float(XCount) * CellScale * 0.5f, 
+			-float(XCount) * CellScale * 0.5f,
 			-float(YCount) * CellScale * 0.5f);
 
 		int32 Index = 0;
@@ -496,7 +502,7 @@ bool AGAGridActor::RefreshDebugMesh()
 
 				VertexPoint.X = float(X) * CellScale + ZeroZeroCorner.X;
 				VertexPoint.Y = float(Y) * CellScale + ZeroZeroCorner.Y;
-				VertexPoint.Z = H + DebugMeshZOffset;
+				VertexPoint.Z = H + MeshZOffset;
 				Vertices[Index] = VertexPoint;
 				Index++;
 			}
@@ -552,7 +558,7 @@ bool AGAGridActor::RefreshDebugMesh()
 		float DeltaX = 1.0f / float(XCount);
 		float DeltaY = 1.0f / float(YCount);
 
-		int32 Index = 0; 
+		int32 Index = 0;
 
 		for (int32 Y = 0; Y <= YCount; Y++)
 		{
@@ -585,9 +591,9 @@ bool AGAGridActor::RefreshDebugMesh()
 		}
 	}
 
-	DebugMeshComponent->CreateMeshSection(
+	MeshComponent->CreateMeshSection(
 		0,				// section index
-		Vertices,		
+		Vertices,
 		Triangles,
 		Normals,
 		UV0,
@@ -597,6 +603,11 @@ bool AGAGridActor::RefreshDebugMesh()
 	);
 
 	return true;
+}
+
+bool AGAGridActor::RefreshDebugMesh()
+{
+	return RefreshMeshHelper(DebugMeshComponent, DebugMeshZOffset);
 }
 
 bool AGAGridActor::RefreshDebugTexture(const FCellRef& Destination, bool HighlightDestination)
@@ -716,6 +727,95 @@ bool AGAGridActor::RefreshDebugTexture(const FCellRef& Destination, bool Highlig
 		Result = true;
 	}
 
+	return Result;
+}
+
+
+// Proctor Cone Visualization --------------------------------
+
+
+bool AGAGridActor::RefreshProctorVisionMesh()
+{
+	return RefreshMeshHelper(ProctorVisionMeshComponent, ProctorVisionMeshZOffset);
+}
+
+bool AGAGridActor::RefreshProctorVisionTexture(const FCellRef& Destination, bool HighlightDestination)
+{
+	bool Result = false;
+
+	if (ProctorVisionMeshComponent)
+	{
+		// create a new texture
+		UTexture2D* RuntimeTexture = UTexture2D::CreateTransient(XCount, YCount);
+		FTexture2DMipMap* FirstMip = &RuntimeTexture->GetPlatformData()->Mips[0];
+		FByteBulkData* ImageData = &FirstMip->BulkData;
+		uint8* RawImageData = (uint8*)ImageData->Lock(LOCK_READ_WRITE);
+		int32 ElementCount = ImageData->GetElementCount();
+		int32 ElementSize = ImageData->GetElementSize();
+
+		check(ElementCount == 4 * XCount * YCount);
+		check(ElementSize == sizeof(uint8));
+
+		int32 Index = 0;
+
+		if (ProctorVisionGridMap.IsValid())
+		{
+			for (int32 Y = 0; Y < YCount; Y++)
+			{
+				for (int32 X = 0; X < XCount; X++)
+				{
+					FCellRef CellRef(X, Y);
+					ECellData CellData = GetCellData(CellRef);
+					bool Traversable = EnumHasAllFlags(CellData, ECellData::CellDataTraversable);
+
+					float MapValue;
+					bool IsOnMap = ProctorVisionGridMap.GetValue(CellRef, MapValue);
+
+					// If in the vision cone and on the map, set RGB = 81, 145, 92 (a nice teal color)
+					if (IsOnMap && MapValue > 0)
+					{
+						RawImageData[Index] = 81;		// blue
+						RawImageData[Index + 1] = 145;	// green
+						RawImageData[Index + 2] = 92;	// red
+						RawImageData[Index + 3] = 200;	// alpha set to semi-transparent
+					}
+					else
+					{
+						// Make it fully transparent
+						RawImageData[Index + 3] = 0;	// alpha
+					}
+
+					Index += 4;
+				}
+			}
+		}
+		else
+		{
+			for (int32 Y = 0; Y < YCount; Y++)
+			{
+				for (int32 X = 0; X < XCount; X++)
+				{
+					// Make it fully transparent
+					RawImageData[Index + 3] = 0;		// alpha
+
+					Index += 4;
+				}
+			}
+		}
+
+		ImageData->Unlock();
+		RuntimeTexture->UpdateResource();
+
+		UMaterialInstanceDynamic* DynamicMaterial = ProctorVisionMeshComponent->CreateDynamicMaterialInstance(0, ProctorVisionMaterial);
+		if (DynamicMaterial)
+		{
+			DynamicMaterial->SetTextureParameterValue("ProctorVisionTexture", RuntimeTexture);
+			ProctorVisionMeshComponent->SetMaterial(0, DynamicMaterial);
+		}
+
+		Result = true;
+	}
+	
 	return Result;
 }
 

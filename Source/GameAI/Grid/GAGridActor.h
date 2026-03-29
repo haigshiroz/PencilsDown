@@ -189,6 +189,10 @@ public:
 
 	// Debugging and Visualization --------------------------------
 
+	bool RefreshMeshHelper(TObjectPtr<UProceduralMeshComponent> Mesh, float MeshZOffset);
+
+	bool RefreshTextureHelper(TObjectPtr<UProceduralMeshComponent> Mesh, float MeshZOffset);
+
 	UPROPERTY(EditAnywhere)
 	FGAGridMap DebugGridMap;
 
@@ -208,4 +212,25 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool RefreshDebugTexture(const FCellRef& Destination = FCellRef(), bool HighlightDestination = true);
 
+	// Visualize Proctor Vision cones -----------------------------
+
+	// Proctor vision grid map (0 for no vision, 1 for vision)
+	UPROPERTY(EditAnywhere)
+	FGAGridMap ProctorVisionGridMap;
+
+	// Proctor vision component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UProceduralMeshComponent> ProctorVisionMeshComponent;
+
+	UPROPERTY(EditAnywhere)
+	float ProctorVisionMeshZOffset;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UMaterialInterface> ProctorVisionMaterial;
+
+	UFUNCTION(BlueprintCallable)
+	bool RefreshProctorVisionMesh();
+
+	UFUNCTION(BlueprintCallable)
+	bool RefreshProctorVisionTexture(const FCellRef& Destination = FCellRef(), bool HighlightDestination = true);
 };

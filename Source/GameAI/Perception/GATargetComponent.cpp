@@ -151,7 +151,7 @@ void UGATargetComponent::OccupancyMapSetPosition(const FVector& Position)
 
 void UGATargetComponent::OccupancyMapUpdate()
 {
-	const AGAGridActor* Grid = GetGridActor();
+	AGAGridActor* Grid = GetGridActor();
 	if (Grid)
 	{
 		FGAGridMap VisibilityMap(Grid, 0.0f);
@@ -204,6 +204,7 @@ void UGATargetComponent::OccupancyMapUpdate()
 			}
 		}
 
+		Grid->ProctorVisionGridMap = VisibilityMap;
 
 		// Get all the remaining probability that wasn't culled
 		float TotalProbBeingUpdated = 0.f;
