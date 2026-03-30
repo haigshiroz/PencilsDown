@@ -832,4 +832,12 @@ bool AGAGridActor::RefreshProctorVisionTexture()
 	return Result;
 }
 
+bool AGAGridActor::IsPositionInProctorVision(FVector Position)
+{
+	FCellRef CellRef = GetCellRef(Position);
+	float IsCellVisible;
+	ProctorVisionGridMap.GetValue(CellRef, IsCellVisible);
+	return IsCellVisible == 1;
+}
+
 UE_ENABLE_OPTIMIZATION

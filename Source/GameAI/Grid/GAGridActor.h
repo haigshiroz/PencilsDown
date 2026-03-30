@@ -233,4 +233,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool RefreshProctorVisionTexture();
+
+	UFUNCTION(BlueprintCallable)
+	bool IsPositionInProctorVision(FVector Position);
 };

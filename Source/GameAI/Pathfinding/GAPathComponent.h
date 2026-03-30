@@ -69,7 +69,8 @@ class UGAPathComponent : public UActorComponent
 
 	EGAPathState RefreshPath();
 
-	EGAPathState AStar(const FVector& StartPoint, TArray<FPathStep>& StepsOut) const;
+	UFUNCTION(BlueprintCallable)
+	EGAPathState AStar(const FVector& StartPoint, const FVector& EndPoint, TArray<FPathStep>& StepsOut) const;
 
 	// Fill the DistanceMap param with distance data based on the starting point and cell ref passed in
 	bool Dijkstra(const FVector& StartPoint, FGAGridMap& DistanceMapOut, TMap<FCellRef, FCellRef>& Prev) const;

@@ -121,25 +121,39 @@ EGAPathState UGAPathComponent::RefreshPath()
 	return State;
 }
 
-EGAPathState UGAPathComponent::AStar(const FVector& StartPoint, TArray<FPathStep>& StepsOut) const
+struct FCellRefAndFScore
 {
-	const AGAGridActor* Grid = GetGridActor();
+	FCellRef Cell;
+	float FScore;
 
-	// Assignment 2 Part3: replace this with an A* search!
-	// HINT 1: you made need a heap structure. A TArray can be accessed as a heap -- just add/remove elements using
-	// the TArray::HeapPush() and TArray::HeapPop() methods.
-	// Note that whatever you push or pop needs to implement the 'less than' operator (operator<)
-	// HINT 2: UE has some useful flag testing function. For example you can test for traversability by doing this:
-	// ECellData Flags = Grid->GetCellData(CellRef);
-	// bool bIsCellTraversable = EnumHasAllFlags(Flags, ECellData::CellDataTraversable)
-	StepsOut.SetNum(1);
-	StepsOut[0].Set(Destination, DestinationCell);
+	// Override < for heap
+	bool operator<(const FCellRefAndFScore& CellRefAndFScore) const
+	{
+		return FScore < CellRefAndFScore.FScore;
+	}
 
-	// HINT 3: make sure you return the correct status, based on whether you succeeded to find a path or not.
-	// See the comment in GAPathComponent above the EGAPathState enum
-	return GAPS_Active;
+	// Override == for checking our list
+	bool operator==(const FCellRefAndFScore& CellRefAndFScore) const
+	{
+		return FScore == CellRefAndFScore.FScore && Cell == CellRefAndFScore.Cell;
+	}
+};
+
+static void ReconstructPath(const AGAGridActor& Grid, const TMap<FCellRef, FCellRef>& CameFrom, FCellRef Current, TArray<FPathStep>& StepsOut)
+{
+	// Clear Array to make sure we start fresh
+	StepsOut.Empty();
+
+	FPathStep TempPathStep;
+
+	while (CameFrom.Contains(Current)) {
+		TempPathStep.Set(Grid.GetCellPosition(Current), Current);
+		StepsOut.Add(TempPathStep);
+		Current = CameFrom[Current];
+	}
+
+	Algo::Reverse(StepsOut);
 }
-
 
 // Checks if a cell is in bounds and traversable
 static bool ValidCell(const AGAGridActor& Grid, const FCellRef& Cell) {
@@ -171,6 +185,90 @@ static void NeighborsOfCell(const AGAGridActor* Grid, const FCellRef& Cell, TArr
 
 		OutNeighbors.Add(Neighbor);
 	}
+}
+
+EGAPathState UGAPathComponent::AStar(const FVector& StartPoint, const FVector& EndPoint, TArray<FPathStep>& StepsOut) const
+{
+	const AGAGridActor* Grid = GetGridActor();
+
+	// Assignment 2 Part3: replace this with an A* search!
+	// HINT 1: you made need a heap structure. A TArray can be accessed as a heap -- just add/remove elements using
+	// the TArray::HeapPush() and TArray::HeapPop() methods.
+	// Note that whatever you push or pop needs to implement the 'less than' operator (operator<)
+	// HINT 2: UE has some useful flag testing function. For example you can test for traversability by doing this:
+	// ECellData Flags = Grid->GetCellData(CellRef);
+	// bool bIsCellTraversable = EnumHasAllFlags(Flags, ECellData::CellDataTraversable)
+
+	// Convert start and destination
+	FCellRef StartFCellRef = Grid->GetCellRef(StartPoint, false);
+	FCellRef DestinationFCellRef = Grid->GetCellRef(EndPoint, false);
+
+	// Array treated as a set with heap structure used to keep track of which cells to explore next
+	TArray<FCellRefAndFScore> OpenSet;
+
+	// Add start to heap. Note, we use a custom struct (FCellRefAndFScore) to define how we compare in the heap.
+	FCellRefAndFScore tempStart = { StartFCellRef, StartFCellRef.Distance(DestinationFCellRef) };
+	OpenSet.HeapPush(tempStart);
+
+	// Map to keep track of what a cell's prev is
+	TMap<FCellRef, FCellRef> cameFrom;
+	// Map to track g-scores (cost of the cheapest path from start to gScore[n]), initialize start with 0
+	TMap<FCellRef, float> GScores;
+	GScores.Add(StartFCellRef, 0.0f);
+	// Map to track f-scores (current best guess of cost of the cheapest path from start to end going through fScore[n])
+	TMap<FCellRef, float> FScores;
+
+	// Allocate space for neighbors array (trying to prevent creating a new array many times)
+	TArray<FCellRef> Neighbors;
+	Neighbors.Reserve(4);
+
+	// While we have more cells to explore...
+	while (!OpenSet.IsEmpty()) {
+		// Pop next off heap
+		FCellRefAndFScore Current;
+		OpenSet.HeapPop(Current);
+		FCellRef CurrentCell = Current.Cell;
+
+		// Check if we're at our destination
+		if (CurrentCell == DestinationFCellRef) {
+			ReconstructPath(*Grid, cameFrom, CurrentCell, StepsOut);
+			return GAPS_Active;
+		}
+
+		// Get neighbors of the current cell
+		Neighbors.Reset();
+		NeighborsOfCell(Grid, CurrentCell, Neighbors);
+
+		// Get current GScore. If not initialized yet, assume it is "infinity"
+		float CurrentCellGScore = GScores.Contains(CurrentCell) ? GScores[CurrentCell] : FLT_MAX;
+		for (FCellRef Neighbor : Neighbors) {
+			// Cost to go from start to this neighbor
+			float TentativeGScore = CurrentCellGScore + CurrentCell.Distance(Neighbor);
+
+			// Get GScore for neighbor. If not initialized yet, assume it is "infinity"
+			float NeighborGScore = GScores.Contains(Neighbor) ? GScores[Neighbor] : FLT_MAX;
+
+			// If this tentative cost is better (faster) than our current best for that neighbor...
+			if (TentativeGScore < NeighborGScore) {
+				// This path to neighbor is better! Update cameFrom, GScore, and FScore
+				cameFrom.Add(Neighbor, CurrentCell);
+				GScores.Add(Neighbor, TentativeGScore);
+				FScores.Add(Neighbor, TentativeGScore + Neighbor.Distance(DestinationFCellRef));
+
+				// Add neighbor to the set if they're not there yet
+				FCellRefAndFScore tempNeighbor = { Neighbor, FScores[Neighbor] };
+				if (!OpenSet.Contains(tempNeighbor)) {
+					OpenSet.HeapPush(tempNeighbor);
+				}
+			}
+		}
+	}
+
+	// HINT 3: make sure you return the correct status, based on whether you succeeded to find a path or not.
+	// See the comment in GAPathComponent above the EGAPathState enum
+
+	// If we reached here, we did not find a valid path to the destination
+	return GAPS_Invalid;
 }
 
 struct FCellRefAndDistance
