@@ -225,7 +225,8 @@ bool UGAPerceptionComponent::InTargetViewCone(FVector Point, AActor *TargetToIgn
 
 	FVector CurrentLocation = OwnerPawn->GetActorLocation();
 	FVector Direction = Point - CurrentLocation;
-	float ConeThreshold = FMath::Cos(VisionParameters.VisionAngle);
+	Direction = Direction.GetSafeNormal(); // Normalize
+	float ConeThreshold = FMath::Cos(FMath::DegreesToRadians(VisionParameters.VisionAngle));
 
 	bool InCone = FVector::DotProduct(OwnerPawn->GetActorForwardVector(), Direction) > ConeThreshold;
 	bool ClearLOS = false;
