@@ -776,26 +776,12 @@ bool AGAGridActor::RefreshProctorVisionTexture()
 						RawImageData[Index] = 92;		// blue
 						RawImageData[Index + 1] = 145;	// green
 						RawImageData[Index + 2] = 81;	// red
-						RawImageData[Index + 3] = 200;	// alpha set to semi-transparent
-
-
-						//RawImageData[Index] = 0;		// blue
-						//RawImageData[Index + 1] = 255;	// green
-						//RawImageData[Index + 2] = 0;	// red
-						//RawImageData[Index + 3] = 255;	// alpha set to semi-transparent
-
+						RawImageData[Index + 3] = 255;	// alpha 
 					}
 					else
 					{
 						// Make it fully transparent
 						RawImageData[Index + 3] = 0;	// alpha
-
-
-						//RawImageData[Index] = 0;		// blue
-						//RawImageData[Index + 1] = 0;	// green
-						//RawImageData[Index + 2] = 255;	// red
-						//RawImageData[Index + 3] = 255;	// alpha set to semi-transparent
-
 					}
 
 					Index += 4;
