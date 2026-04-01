@@ -185,8 +185,10 @@ void UGATargetComponent::FindVisibleCellsHelper()
 							// If Cell is not already visible, check if it is by this perception
 							int32 Index = Grid->CellRefToIndex(TempCell);
 							FVector TempCellCoord = Grid->GetCellPosition(TempCell);
-							// Passing in NULL since we don't want to ignore anything (other than self which is already handled)
-							if (PerceptionComponent->InTargetViewCone(TempCellCoord, NULL))
+							// Ignore all the student actors
+							TArray<AActor*> TargetsToIgnore;
+							UGameplayStatics::GetAllActorsOfClass(GetWorld(), ActorClassToIgnore, TargetsToIgnore);
+							if (PerceptionComponent->InTargetViewCone(TempCellCoord, TargetsToIgnore))
 							{
 								VisibilityMap.SetValue(TempCell, 1);
 							}

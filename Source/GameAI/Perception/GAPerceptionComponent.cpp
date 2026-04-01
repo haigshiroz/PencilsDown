@@ -192,7 +192,9 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		}
 
 		// Update LOS
-		TargetView->bClearLos = InTargetViewCone(TargetActor->GetActorLocation(), TargetActor);
+		TArray<AActor*> TargetsToIgnore;
+		TargetsToIgnore.Add(TargetActor);
+		TargetView->bClearLos = InTargetViewCone(TargetActor->GetActorLocation(), TargetsToIgnore);
 
 		// Update Awareness
 		if (TargetView->bClearLos)
@@ -214,7 +216,7 @@ const FTargetView* UGAPerceptionComponent::GetTargetView(FGuid TargetGuid) const
 }
 
 // NOTE: I was looking at figure 3.20 in the textbook to detect whether something is in the cone
-bool UGAPerceptionComponent::InTargetViewCone(FVector Point, AActor *TargetToIgnore) const
+bool UGAPerceptionComponent::InTargetViewCone(FVector Point, const TArray<AActor*>& TargetsToIgnore) const
 {
 	APawn* OwnerPawn = GetOwnerPawn();
 	if (OwnerPawn == NULL)
@@ -242,10 +244,7 @@ bool UGAPerceptionComponent::InTargetViewCone(FVector Point, AActor *TargetToIgn
 		Start.Z += 50.0f;							// offset by 50uus so 
 		// Add any actors that should be ignored by the raycast by calling
 		Params.AddIgnoredActor(OwnerPawn);			// Ignore the AI themself
-		if (TargetToIgnore != NULL) 
-		{
-			Params.AddIgnoredActor(TargetToIgnore);	// Ignore the player pawn
-		}
+		Params.AddIgnoredActors(TargetsToIgnore);	// Ignore the passed in targets (ex: player pawn)
 		bool bHitSomething = World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, Params);
 		ClearLOS = !bHitSomething;
 	}

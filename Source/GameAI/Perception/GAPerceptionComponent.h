@@ -106,5 +106,5 @@ class UGAPerceptionComponent : public UActorComponent
 	// Determines whether given point is within this Perception Component's cone based of this Perception Component's target view
 	// Takes in an optional AActor target to ignore when casting a ray	
 	UFUNCTION(BlueprintCallable)
-	bool InTargetViewCone(FVector Point, AActor* TargetToIgnore) const;
+	bool InTargetViewCone(FVector Point, const TArray<AActor*>& TargetsToIgnore) const;
 };

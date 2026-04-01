@@ -61,6 +61,9 @@ class UGATargetComponent : public UActorComponent
 
 	// Finds visible cells from perceptors and updates the GridActor
 	void FindVisibleCellsHelper();
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> ActorClassToIgnore;
 	
 	// Occupancy Map
 	UPROPERTY(BlueprintReadOnly)
