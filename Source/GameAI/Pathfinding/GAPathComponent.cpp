@@ -115,7 +115,15 @@ EGAPathState UGAPathComponent::RefreshPath()
 	}
 	else 
 	{
+		TArray<FPathStep> UnsmoothedSteps;
+		Steps.Empty();
+		State = AStar(StartPoint, Destination, UnsmoothedSteps);
 		State = GAPS_Active;
+		if (State == EGAPathState::GAPS_Active)
+		{
+			// Smooth the path!
+			State = SmoothPath(StartPoint, UnsmoothedSteps, Steps);
+		}
 	}
 
 	return State;
@@ -550,7 +558,6 @@ void UGAPathComponent::FollowPath()
 		Destination = DestinationPoint;
 
 		State = GAPS_Invalid;
-		bDestinationValid = true;
 
 		const AGAGridActor* Grid = GetGridActor();
 		if (Grid)
