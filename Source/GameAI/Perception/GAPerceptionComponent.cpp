@@ -241,7 +241,7 @@ bool UGAPerceptionComponent::InTargetViewCone(FVector Point, const TArray<AActor
 		FCollisionQueryParams Params;
 		FVector Start = CurrentLocation;			// need a ray start
 		FVector End = Point;						// need a ray end
-		Start.Z += 50.0f;							// offset by 50uus so 
+		End.Z += 1.0f;								// offset so it's not hitting the ground
 		// Add any actors that should be ignored by the raycast by calling
 		Params.AddIgnoredActor(OwnerPawn);			// Ignore the AI themself
 		Params.AddIgnoredActors(TargetsToIgnore);	// Ignore the passed in targets (ex: player pawn)
