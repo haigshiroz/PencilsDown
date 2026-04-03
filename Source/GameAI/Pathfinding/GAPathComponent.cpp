@@ -101,14 +101,18 @@ EGAPathState UGAPathComponent::RefreshPath()
 		return State;
 	}
 
+	// Ignore the vertical distance
 	FVector StartPoint = Owner->GetActorLocation();
+	StartPoint.Z = 0;
+	FVector EndPoint = Destination;
+	EndPoint.Z = 0;
 
 	check(bDestinationValid);
 
-	float DistanceToDestination = FVector::Dist(StartPoint, Destination);
+	float DistanceToDestination = FVector::Dist(StartPoint, EndPoint);
 
 	// If we are close enough or if there's no more steps
-	if (DistanceToDestination <= ArrivalDistance) //  || Steps.Num() <= 0
+	if (DistanceToDestination <= ArrivalDistance) // || Steps.Num() <= 0
 	{
 		// Yay! We got there!
 		State = GAPS_Finished;
