@@ -428,7 +428,7 @@ bool AGAGridActor::RefreshDataFromNav()
 // Debugging and Visualization --------------------------------
 
 // Helper for refreshing meshes
-bool AGAGridActor::RefreshMeshHelper(TObjectPtr<UProceduralMeshComponent> MeshComponent, float MeshZOffset)
+bool AGAGridActor::RefreshMeshHelper(TObjectPtr<UProceduralMeshComponent> MeshComponent, float MeshZOffset, bool IgnoreNonTraversable)
 {
 	TArray<FVector> Vertices;
 	TArray<int32> Triangles;
@@ -522,7 +522,7 @@ bool AGAGridActor::RefreshMeshHelper(TObjectPtr<UProceduralMeshComponent> MeshCo
 			for (int32 X = 0; X < XCount; X++)
 			{
 				// Don't bother for non traversable cells
-				if (EnumHasAllFlags(GetCellData(FCellRef(X, Y)), ECellData::CellDataTraversable))
+				if (IgnoreNonTraversable || EnumHasAllFlags(GetCellData(FCellRef(X, Y)), ECellData::CellDataTraversable))
 				{
 					// First figure out the four vertices of this cell (in counter-clockwise order)
 					// Note: personally, this breaks my brain a bit, but the labels of "bottom" and "left" etc. below are using
@@ -607,7 +607,7 @@ bool AGAGridActor::RefreshMeshHelper(TObjectPtr<UProceduralMeshComponent> MeshCo
 
 bool AGAGridActor::RefreshDebugMesh()
 {
-	return RefreshMeshHelper(DebugMeshComponent, DebugMeshZOffset);
+	return RefreshMeshHelper(DebugMeshComponent, DebugMeshZOffset, false);
 }
 
 bool AGAGridActor::RefreshDebugTexture(const FCellRef& Destination, bool HighlightDestination)
@@ -736,7 +736,7 @@ bool AGAGridActor::RefreshDebugTexture(const FCellRef& Destination, bool Highlig
 
 bool AGAGridActor::RefreshProctorVisionMesh()
 {
-	return RefreshMeshHelper(ProctorVisionMeshComponent, ProctorVisionMeshZOffset);
+	return RefreshMeshHelper(ProctorVisionMeshComponent, ProctorVisionMeshZOffset, true);
 }
 
 bool AGAGridActor::RefreshProctorVisionTexture()

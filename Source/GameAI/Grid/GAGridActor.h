@@ -189,7 +189,7 @@ public:
 
 	// Debugging and Visualization --------------------------------
 
-	bool RefreshMeshHelper(TObjectPtr<UProceduralMeshComponent> Mesh, float MeshZOffset);
+	bool RefreshMeshHelper(TObjectPtr<UProceduralMeshComponent> Mesh, float MeshZOffset, bool IgnoreNonTraversable);
 
 	bool RefreshTextureHelper(TObjectPtr<UProceduralMeshComponent> Mesh, float MeshZOffset);
 
