@@ -37,10 +37,10 @@ struct FVisionParameters
 
 	FVisionParameters() : VisionAngle(90.0f), VisionDistance(1000.0f) {}
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float VisionAngle;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float VisionDistance;
 };
 
