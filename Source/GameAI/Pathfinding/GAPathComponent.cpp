@@ -108,7 +108,7 @@ EGAPathState UGAPathComponent::RefreshPath()
 	float DistanceToDestination = FVector::Dist(StartPoint, Destination);
 
 	// If we are close enough or if there's no more steps
-	if (DistanceToDestination <= ArrivalDistance || Steps.Num() <= 0)
+	if (DistanceToDestination <= ArrivalDistance) //  || Steps.Num() <= 0
 	{
 		// Yay! We got there!
 		State = GAPS_Finished;
@@ -118,7 +118,6 @@ EGAPathState UGAPathComponent::RefreshPath()
 		TArray<FPathStep> UnsmoothedSteps;
 		Steps.Empty();
 		State = AStar(StartPoint, Destination, UnsmoothedSteps);
-		State = GAPS_Active;
 		if (State == EGAPathState::GAPS_Active)
 		{
 			// Smooth the path!
