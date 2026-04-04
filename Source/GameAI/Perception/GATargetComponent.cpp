@@ -44,6 +44,22 @@ AGAGridActor* UGATargetComponent::GetGridActor() const
 	}
 }
 
+float UGATargetComponent::GetAwarenessOfTarget()
+{
+	UGAPerceptionSystem* PerceptionSystem = UGAPerceptionSystem::GetPerceptionSystem(this);
+	if (PerceptionSystem)
+	{
+		TArray<TObjectPtr<UGAPerceptionComponent>>& PerceptionComponents = PerceptionSystem->GetAllPerceptionComponents();
+		for (UGAPerceptionComponent* PerceptionComponent : PerceptionComponents)
+		{
+			const FTargetView* TargetView = PerceptionComponent->GetTargetView(TargetGuid);
+			return TargetView->Awareness;
+		}
+	}
+
+	return 0.0f;
+}
+
 
 void UGATargetComponent::OnRegister()
 {

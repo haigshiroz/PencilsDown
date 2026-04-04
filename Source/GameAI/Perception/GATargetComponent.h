@@ -97,6 +97,10 @@ class UGATargetComponent : public UActorComponent
 		return (LastKnownState.State == GATS_Immediate) || (LastKnownState.State == GATS_Hidden);
 	}
 
+	UFUNCTION(BlueprintCallable)
+	float GetAwarenessOfTarget();
+
+
 
 	// UPDATE ----------
 
