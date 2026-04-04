@@ -95,11 +95,11 @@ class UGAPerceptionComponent : public UActorComponent
 	// Return the FTargetView for the given target
 	const FTargetView * GetTargetView(FGuid TargetGuid) const;
 
-	// Rate at which Awareness grows per tick
+	// Rate at which Awareness grows per second
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float AwarenessGrowthRate;
 
-	// Rate at which Awareness decays per tick
+	// Rate at which Awareness decays per second
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float AwarenessDecayRate;
 

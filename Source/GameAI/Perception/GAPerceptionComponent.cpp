@@ -197,7 +197,7 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		TargetView->bClearLos = InTargetViewCone(TargetActor->GetActorLocation(), TargetsToIgnore);
 
 		// Update Awareness
-		if (TargetView->bClearLos)
+		if (TargetView->bClearLos && TargetComponent->AdditionalTargetInViewRequirements)
 		{
 			TargetView->Awareness = FMath::Min(TargetView->Awareness + (AwarenessGrowthRate * DeltaTime), 1);
 		}

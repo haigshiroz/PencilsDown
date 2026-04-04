@@ -72,6 +72,9 @@ class UGATargetComponent : public UActorComponent
 	UPROPERTY(BlueprintReadWrite)
 	bool bDebugOccupancyMap;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool AdditionalTargetInViewRequirements;
+
 	// Cached pointer to the grid actor
 	UPROPERTY()
 	mutable TSoftObjectPtr<AGAGridActor> GridActor;
