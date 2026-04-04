@@ -13,9 +13,6 @@ UGATargetComponent::UGATargetComponent(const FObjectInitializer& ObjectInitializ
 	PrimaryComponentTick.bCanEverTick = true;
 
 	SetTickGroup(ETickingGroup::TG_PostUpdateWork);
-
-	// Generate a new guid
-	TargetGuid = FGuid::NewGuid();
 }
 
 
@@ -64,6 +61,9 @@ float UGATargetComponent::GetAwarenessOfTarget()
 void UGATargetComponent::OnRegister()
 {
 	Super::OnRegister();
+
+	// Generate a new guid
+	TargetGuid = FGuid::NewGuid();
 
 	UGAPerceptionSystem* PerceptionSystem = UGAPerceptionSystem::GetPerceptionSystem(this);
 	if (PerceptionSystem)
@@ -203,7 +203,7 @@ void UGATargetComponent::FindVisibleCellsHelper()
 							FVector TempCellCoord = Grid->GetCellPosition(TempCell);
 							// Ignore all the student actors
 							TArray<AActor*> TargetsToIgnore;
-							UGameplayStatics::GetAllActorsOfClass(GetWorld(), ActorClassToIgnore, TargetsToIgnore);
+							UGameplayStatics::GetAllActorsOfClass(GetWorld(), PerceptionSystem->ActorClassToIgnoreTracelines, TargetsToIgnore);
 							if (PerceptionComponent->InTargetViewCone(TempCellCoord, TargetsToIgnore))
 							{
 								VisibilityMap.SetValue(TempCell, 1);

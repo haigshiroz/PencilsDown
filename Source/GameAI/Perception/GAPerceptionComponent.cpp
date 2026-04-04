@@ -160,6 +160,13 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		return;
 	}
 
+	UGAPerceptionSystem* PerceptionSystem = UGAPerceptionSystem::GetPerceptionSystem(this);
+	if (PerceptionSystem == NULL)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UGAPerceptionSystem::GetPerceptionSystem PerceptionSystem is NULL."));
+		return;
+	}
+
 	// If we don't already have a target data for the given target component, add it
 	FTargetView *TargetView = TargetMap.Find(TargetComponent->TargetGuid);
 	if (TargetView == NULL)		
@@ -193,6 +200,7 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 
 		// Update LOS
 		TArray<AActor*> TargetsToIgnore;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), PerceptionSystem->ActorClassToIgnoreTracelines, TargetsToIgnore);
 		TargetsToIgnore.Add(TargetActor);
 		TargetView->bClearLos = InTargetViewCone(TargetActor->GetActorLocation(), TargetsToIgnore);
 
