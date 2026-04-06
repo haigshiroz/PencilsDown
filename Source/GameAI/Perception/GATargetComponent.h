@@ -94,8 +94,10 @@ class UGATargetComponent : public UActorComponent
 		return (LastKnownState.State == GATS_Immediate) || (LastKnownState.State == GATS_Hidden);
 	}
 
+	// Each perception componenet has their own awareness of the target. 
+	// This function gets the highest awareness for this target
 	UFUNCTION(BlueprintCallable)
-	float GetAwarenessOfTarget();
+	float GetMaxAwarenessOfTarget();
 
 
 

@@ -41,8 +41,10 @@ AGAGridActor* UGATargetComponent::GetGridActor() const
 	}
 }
 
-float UGATargetComponent::GetAwarenessOfTarget()
+float UGATargetComponent::GetMaxAwarenessOfTarget()
 {
+	float MaxAwareness = 0.0f;
+
 	UGAPerceptionSystem* PerceptionSystem = UGAPerceptionSystem::GetPerceptionSystem(this);
 	if (PerceptionSystem)
 	{
@@ -50,11 +52,14 @@ float UGATargetComponent::GetAwarenessOfTarget()
 		for (UGAPerceptionComponent* PerceptionComponent : PerceptionComponents)
 		{
 			const FTargetView* TargetView = PerceptionComponent->GetTargetView(TargetGuid);
-			return TargetView->Awareness;
+			if (TargetView->Awareness > MaxAwareness)
+			{
+				MaxAwareness = TargetView->Awareness;
+			}
 		}
 	}
 
-	return 0.0f;
+	return MaxAwareness;
 }
 
 
