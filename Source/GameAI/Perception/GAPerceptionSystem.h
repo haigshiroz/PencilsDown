@@ -20,6 +20,17 @@ class UGAPerceptionSystem : public UActorComponent
 	UPROPERTY(BlueprintReadOnly)
 	TArray<TObjectPtr<UGATargetComponent>> TargetComponents;
 
+	// Cached pointer to the grid actor
+	UPROPERTY()
+	mutable TSoftObjectPtr<AGAGridActor> GridActor;
+
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	// Finds visible cells from perceptors and updates the GridActor
+	void FindVisibleCellsHelper();
+
+	UFUNCTION(BlueprintCallable)
+	AGAGridActor* GetGridActor() const;
 
 	bool RegisterPerceptionComponent(UGAPerceptionComponent* PerceptionComponent);
 	bool UnregisterPerceptionComponent(UGAPerceptionComponent* PerceptionComponent);

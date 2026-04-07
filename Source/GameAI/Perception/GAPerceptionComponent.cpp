@@ -213,7 +213,7 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		{
 			TargetView->Awareness = FMath::Max(TargetView->Awareness - (AwarenessDecayRate * DeltaTime), 0);
 		}
-		//UE_LOG(LogTemp, Warning, TEXT("GUID: %s, Awareness: %f"), *TargetComponent->TargetGuid.ToString(), TargetView->Awareness);
+		//UE_LOG(Log Temp, Warning, TEXT("GUID: %s, Awareness: %f"), *TargetComponent->TargetGuid.ToString(), TargetView->Awareness);
 	}
 }
 

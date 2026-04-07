@@ -58,9 +58,6 @@ class UGATargetComponent : public UActorComponent
 	// Last known state of the target
 	UPROPERTY(BlueprintReadOnly)
 	FTargetState LastKnownState;
-
-	// Finds visible cells from perceptors and updates the GridActor
-	void FindVisibleCellsHelper();
 	
 	// Occupancy Map
 	UPROPERTY(BlueprintReadOnly)

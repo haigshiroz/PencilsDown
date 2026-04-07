@@ -120,9 +120,6 @@ void UGATargetComponent::TickComponent(float DeltaTime, enum ELevelTick TickType
 		}
 	}
 
-	// Update visible cells map
-	FindVisibleCellsHelper();
-
 	if (isImmediate)
 	{
 		AActor* Owner = GetOwner();
@@ -139,16 +136,16 @@ void UGATargetComponent::TickComponent(float DeltaTime, enum ELevelTick TickType
 		LastKnownState.State = GATS_Hidden;
 	}
 
-	if (LastKnownState.State == GATS_Hidden)
-	{
-		OccupancyMapUpdate();
-	}
+	//if (LastKnownState.State == GATS_Hidden)
+	//{
+	//	OccupancyMapUpdate();
+	//}
 
-	// As long as I'm known, whether I'm immediate or not, diffuse the probability in the omap
-	if (IsKnown())
-	{
-		OccupancyMapDiffuse();
-	}
+	//// As long as I'm known, whether I'm immediate or not, diffuse the probability in the omap
+	//if (IsKnown())
+	//{
+	//	OccupancyMapDiffuse();
+	//}
 
 	if (bDebugOccupancyMap)
 	{
@@ -170,58 +167,6 @@ void UGATargetComponent::OccupancyMapSetPosition(const FVector& Position)
 	AGAGridActor* Grid = GetGridActor();
 	FCellRef PositionFCellRef = Grid->GetCellRef(Position);
 	OccupancyMap.SetValue(PositionFCellRef, 1.f);
-}
-
-void UGATargetComponent::FindVisibleCellsHelper()
-{
-	AGAGridActor* Grid = GetGridActor();
-	if (Grid)
-	{
-		FGAGridMap VisibilityMap(Grid, 0.0f);
-
-		// STEP 1: Build a visibility map, based on the perception components of the AIs in the world
-		// The visibility map is a simple map where each cell is either 0 (not currently visible to ANY perceiver) or 1 (currently visible to one or more perceivers).
-		UGAPerceptionSystem* PerceptionSystem = UGAPerceptionSystem::GetPerceptionSystem(this);
-		if (PerceptionSystem)
-		{
-			TArray<TObjectPtr<UGAPerceptionComponent>>& PerceptionComponents = PerceptionSystem->GetAllPerceptionComponents();
-			for (UGAPerceptionComponent* PerceptionComponent : PerceptionComponents)
-			{
-				// Find visible cells for this perceiver.
-				// Reminder: Use the PerceptionComponent.VisionParameters when determining whether a cell is visible or not (in addition to a line trace).
-				// Suggestion: you might find it useful to add a UGAPerceptionComponent::TestVisibility method to the perception component.
-
-				// For every cell
-				for (int32 Y = 0; Y < Grid->YCount; Y++)
-				{
-					for (int32 X = 0; X < Grid->XCount; X++)
-					{
-						// Get a CellRef
-						FCellRef TempCell(X, Y);
-						// Check if the cell is already visible from another perceptor to prevent excess ray tracing)
-						float TempVal;
-						VisibilityMap.GetValue(TempCell, TempVal);
-						if (TempVal == 0)
-						{
-							// If Cell is not already visible, check if it is by this perception
-							int32 Index = Grid->CellRefToIndex(TempCell);
-							FVector TempCellCoord = Grid->GetCellPosition(TempCell);
-							// Ignore all the student actors
-							TArray<AActor*> TargetsToIgnore;
-							UGameplayStatics::GetAllActorsOfClass(GetWorld(), PerceptionSystem->ActorClassToIgnoreTracelines, TargetsToIgnore);
-							if (PerceptionComponent->InTargetViewCone(TempCellCoord, TargetsToIgnore))
-							{
-								VisibilityMap.SetValue(TempCell, 1);
-							}
-						}
-					}
-				}
-			}
-		}
-
-		// Update GridActor's gridmap
-		Grid->ProctorVisionGridMap = VisibilityMap;
-	}
 }
 
 
