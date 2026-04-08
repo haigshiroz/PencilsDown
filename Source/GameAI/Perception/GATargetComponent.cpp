@@ -52,7 +52,7 @@ float UGATargetComponent::GetMaxAwarenessOfTarget()
 		for (UGAPerceptionComponent* PerceptionComponent : PerceptionComponents)
 		{
 			const FTargetView* TargetView = PerceptionComponent->GetTargetView(TargetGuid);
-			if (TargetView->Awareness > MaxAwareness)
+			if (TargetView && TargetView->Awareness > MaxAwareness)
 			{
 				MaxAwareness = TargetView->Awareness;
 			}
@@ -112,7 +112,7 @@ void UGATargetComponent::TickComponent(float DeltaTime, enum ELevelTick TickType
 			// If any of the perceptors are at 1.0 awareness of the target
 			const FTargetView* TargetView = PerceptionComponent->GetTargetView(TargetGuid);
 			//UE_LOG(LogTemp, Warning, TEXT("AWARENESS: %f"), TargetView->Awareness);
-			if (TargetView && (FMath::Abs(TargetView->Awareness - 1.0f) <= 0.00001))
+			if (TargetView && (FMath::Abs(TargetView->Awareness - 1.0f) <= 0.05))
 			{
 				isImmediate = true;
 				break;

@@ -204,8 +204,10 @@ void UGAPerceptionComponent::UpdateTargetView(UGATargetComponent* TargetComponen
 		TargetsToIgnore.Add(TargetActor);
 		TargetView->bClearLos = InTargetViewCone(TargetActor->GetActorLocation(), TargetsToIgnore);
 
+		float Distance = FVector::Dist2D(TargetActor->GetActorLocation(), OwnerPawn->GetActorLocation());
+
 		// Update Awareness
-		if (TargetView->bClearLos && TargetComponent->AdditionalTargetInViewRequirements)
+		if ((Distance < PerceptionSystem->NearbyPerceptionRadius || TargetView->bClearLos) && TargetComponent->AdditionalTargetInViewRequirements)
 		{
 			TargetView->Awareness = FMath::Min(TargetView->Awareness + (AwarenessGrowthRate * DeltaTime), 1);
 		}
