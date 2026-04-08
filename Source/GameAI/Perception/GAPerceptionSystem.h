@@ -45,4 +45,7 @@ class UGAPerceptionSystem : public UActorComponent
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> ActorClassToIgnoreTracelines;
+
+	UPROPERTY(EditAnywhere)
+	float NearbyPerceptionRadius;
 };

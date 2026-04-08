@@ -55,7 +55,11 @@ void UGAPerceptionSystem::FindVisibleCellsHelper()
 							// Ignore all the student actors
 							TArray<AActor*> TargetsToIgnore;
 							UGameplayStatics::GetAllActorsOfClass(GetWorld(), PerceptionSystem->ActorClassToIgnoreTracelines, TargetsToIgnore);
-							if (PerceptionComponent->InTargetViewCone(TempCellCoord, TargetsToIgnore))
+
+							APawn* OwnerPawn = PerceptionComponent->GetOwnerPawn();
+							float Distance = FVector::Dist2D(TempCellCoord, OwnerPawn->GetActorLocation());
+
+							if (Distance < NearbyPerceptionRadius || PerceptionComponent->InTargetViewCone(TempCellCoord, TargetsToIgnore))
 							{
 								VisibilityMap.SetValue(TempCell, 1);
 							}
